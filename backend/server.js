@@ -29,6 +29,7 @@ const PORT= 3000;
     res.sendFile(path.join(__dirname, 'home.html'));
   });
 
+  //this path will be available only for loggin users.
   app.get('/restrictedtoauth',checkrestrictedforAuth,(req,res)=>{
     res.sendFile(path.join(__dirname, 'restricted.html'));
   })
