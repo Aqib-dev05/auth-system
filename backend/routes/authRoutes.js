@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { v4 : uuidv4 } = require('uuid');
 
@@ -10,11 +11,20 @@ router.post("/login",async (req, res) => {
    if(person){
     const sessionId = uuidv4();
     // res.setHeader("Set-Cookie", "isLoggedIn=true; path=/;");
-    res.cookie("uuid",sessionId);
+    //protected using sessionId and cookie
+
+   // res.cookie("uuid",sessionId);
+    // res.redirect("/api/description/afterLogIn");
+
+    //now,protected using jwt
+const token = jwt.sign({id: person._id}, "jwtSecret123");
+    res.cookie("token", token);
     res.redirect("/api/description/afterLogIn");
    }
+
     else{
-    res.status(401).send("Invalid credentials");
+    res.status(401).json({ message: "Invalid credentials" });
+    
     }
 });
 
@@ -25,7 +35,7 @@ router.post("/register", (req, res) => {
   const newUser = new User({username,email,password});
   newUser.save()
     .then(() => {
-      res.redirect("/api/description/afterSignIn");
+      res.status(200).json({ message: "Registration successful" });
     })
     .catch((err) => {
       res.status(500).send("Error registering user");

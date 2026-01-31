@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const mongoURI = 'mongodb://localhost:27017/authProject';
 const authRoutes = require('./routes/authRoutes');
@@ -10,11 +11,25 @@ const PORT= 3000;
  const app= express();
 
   function checkrestrictedforAuth(req,res,next){
-    const sessionId = req.cookies.uuid;
-    if(!sessionId){
-      return res.status(401).send("Unauthorized: Please log in to access this resource.");
+    //session id based
+    // const sessionId = req.cookies.uuid;                 
+    // if(!sessionId){
+    //   return res.status(401).send("Unauthorized: Please log in to access this resource.");
+    // }
+
+    //now,toekn based 
+    const token=req.cookies.token;
+    if(!token){
+      return res.status(401).send("Unauthorized: No token provided.");
     }
-    next();
+    // Verify the token using jwt.verify
+    jwt.verify(token, 'jwtSecret123', (err, user) => {
+      if (err) {
+        return res.status(403).send("Forbidden: Invalid token.");
+      }
+      req.user = user; // Attach user payload to the request object
+      next();
+    });
   }
 
  app.use(express.json());
